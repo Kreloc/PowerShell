@@ -1,0 +1,35 @@
+Function Get-LANDeskTaskList 
+{
+	<#	
+		.SYNOPSIS
+			Lists the tasks on the landesk server.
+		
+		.DESCRIPTION
+			Lists the tasks on the LANDesk server and creates an object that can be piped to other functions.
+
+		.EXAMPLE
+			Get-LANDeskTaskList
+			
+			Explanation of this example
+			
+		.EXAMPLE
+			Import-CSV .\computers.csv | Get-LANDeskTaskList
+		
+			Explanation of this example where computers.csv had ComputerName as a header.
+			
+	#>
+	[CmdletBinding()]
+	param
+	(
+		[Parameter(Mandatory=$True,
+		ValueFromPipeline=$True, ValueFromPipelinebyPropertyName=$true)]
+		[alias("CN","MachineName")]
+		[string]$ComputerName	
+	)
+	Begin{}
+	Process 
+	{
+		 $LANDeskWebService.ListSWDTasks().ScheduledTasks	
+	}
+	End{}
+}
