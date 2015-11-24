@@ -1,2 +1,0 @@
-If(!(Test-Path "C:\Scripts\2012sg\")){New-Item -Path "C:\Scripts\2012sg\" -ItemType Directory | Out-Null}
-Get-Process | Select Name, ID | Format-Table -Property * | Out-File "C:\Scripts\2012sg\Process3.txt"

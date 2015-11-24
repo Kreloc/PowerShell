@@ -1,1 +1,0 @@
-Import-CSV .\input.csv | ForEach-Object -Process {Get-WmiObject Win32_OperatingSystem -ComputerName $_.MACHINENAME | Select -ExpandProperty caption}
