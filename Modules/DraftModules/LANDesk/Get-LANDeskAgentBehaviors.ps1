@@ -11,9 +11,7 @@ Function Get-LANDeskAgentBehaviors
 		.EXAMPLE
 			Get-LANDeskAgentBehaviors
 			
-			Retruns an object with the name and ID of the Agent Behvaiors on the connected LANDesk webservice.
-
-			
+			Retruns an object with the name and ID of the Agent Behvaiors on the connected LANDesk webservice.			
 	#>
 	[CmdletBinding()]
 	param()

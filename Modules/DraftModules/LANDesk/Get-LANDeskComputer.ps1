@@ -23,6 +23,10 @@ Function Get-LANDeskComputer
 			Returns all LANDeskComputer objects. Ignore this example, still working on getting it to perform correctly.
 			Instead just run Get-LANDeskComputer with no paramters to retrieve the same results.
 			
+			Get-LANDeskComputer -Filter {$_.ComputerName -like "*"}
+			
+			Returns all LANDeskComputer objects.
+			
 			Get-LANDeskComputer -Filter {$_.ComputerName -like "LA-LDP*"}
 			
 			Returns all LANDeskComputer objects that have a computername beginning with LA-LDP
@@ -57,13 +61,11 @@ Function Get-LANDeskComputer
 	[CmdletBinding()]
 	param
 	(
-		[Parameter(Mandatory=$False, ValueFromPipelinebyPropertyName=$true)]
-		 [Parameter(ParameterSetName='Filter')]
+		[Parameter(Mandatory=$False, ValueFromPipelinebyPropertyName=$true,ParameterSetName='Filter')]
 		[Scriptblock]$Filter = {$_.ComputerName -like "*"},
 		[Parameter(Mandatory=$False,
-		ValueFromPipelinebyPropertyName=$true)]
+		ValueFromPipelinebyPropertyName=$true,ParameterSetName='Identity')]
 		[Alias('ComputerName',"IPAddress","MACAddress","GUID")]
-		[Parameter(ParameterSetName='Identity')]
 		[string]$Identity
 	)
 	Begin

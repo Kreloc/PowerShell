@@ -7,18 +7,20 @@ Function Get-LANDeskMachineData
 		.DESCRIPTION
 			Retrieves more detailed information about the computer specified by the GUID parameter.
 		
-		.PARAMETER ComputerName
-			A description of the ComputerName parameter.
+		.PARAMETER GUID
+			The GUID of the LANDeskComputer to obtain Machine Data for from the LANDesk WebService.
 
 		.EXAMPLE
-			Get-LANDeskMachineData <ComputerName>
+			$LANDeskComputers | Where {$_.ComputerName -eq "THATPC"} | Get-LANDeskMachineData -ColumnSetName "Mark"
 			
-			Explanation of this example
+			Returns machine information on the the computer named THATPC. Will return all of the information viewable from the Columns set
+			Mark.
 			
 		.EXAMPLE
-			Get-Content computers.txt | Get-LANDeskMachineData
+			$results = Get-LANDeskComputer -Filter {$_.ComputerName -like "la-ldp*"} | Get-LANDeskMachineData -ColumnSetName "Other"
 		
-			Explanation of this example.
+			Pipes the GUIDs of all the computers with a name beginning with la-ldp into the function and
+			Stores the results of the GetMachineDataEX method call using the column setnamed Other into the variable named $results.
 				
 	#>
 	[CmdletBinding()]
@@ -54,7 +56,7 @@ Function Get-LANDeskMachineData
 		}
 		else
 		{
-			$MachineData | Select DisplayName, Type, OS
+			$MachineData
 		}
 	}
 }

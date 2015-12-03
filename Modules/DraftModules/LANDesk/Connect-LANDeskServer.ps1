@@ -11,9 +11,9 @@ Function Connect-LANDeskServer
 			The name of the LANDesk server to connect to.
 
 		.EXAMPLE
-			Connect-LANDeskServer LDServer
+			Connect-LANDeskServer -LANDeskServer "LDServer"
 			
-			Connects to the LDServer and prompts for credentials. It then verifies the rights you have on that server.		
+			Connects to the LDServer. It then verifies the rights you have on that server.		
 			
 	#>
 	[CmdletBinding()]
