@@ -1,4 +1,5 @@
 Function Connect-PANxmlAPI 
+{
 	<#
 	.SYNOPSIS
 		Connects to a Palo Alto firewall and returns an connection string with API key.
