@@ -16,7 +16,10 @@ Function Get-AdobeReaderDCVersionInstalled
 			Gets the current version of Adobe Reader DC installed on the current computer.
 			
 		.EXAMPLE
-			Get-Content computers.txt | Get-AdobeReaderDCVersionInstalled
+			$results = Get-Content computers.txt | Get-AdobeReaderDCVersionInstalled -Verbose
+            $results
+
+            Gets the current version of Adobe Reader DC installed on each computer in the computers.txt file and stores the output in a variable.
 		
 		.NOTES
 			Requires admin shares.
@@ -32,12 +35,14 @@ Function Get-AdobeReaderDCVersionInstalled
 		try
 		{
 			Write-Verbose "Attempting to get Adobe Reader DC version."
-			$AdobeReaderDC = Get-ChildItem "\\$ComputerName\c$\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe" -ErrorAction Stop
+            $Path = "\\$($ComputerName)\c$\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"
+			$AdobeReaderDC = Get-ChildItem $Path -ErrorAction Stop
 			#"Adobe Reader DC version installed is $($AdobeReaderDC.VersionInfo.ProductVersion)"
+            $AdobeReaderDCVersion = $($AdobeReaderDC.VersionInfo.ProductVersion)
             Write-Verbose "Running regex and then string manipulation to get version to output the same as on the Adobe website"
             $regex = ".*\."
             $DCversion = [regex]::matches($AdobeReaderDCVersion, $regex, "IgnoreCase")
-            $versionOut = $DCversions.Value.TrimEnd('.')
+            $versionOut = $DCversion.Value.TrimEnd('.')
             $splitVersion = $versionOut -split '(\.)'
             $splitVersion[2] = ((($versionOut -split '(\.)')[2]).Insert(0,0)).Insert(0,0)
             $AdobeReaderDCVersion = $splitVersion -join ""
