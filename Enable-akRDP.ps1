@@ -30,11 +30,15 @@
             Enable-akRDP -ComputerName "OTHERPC" -UserName "bdoll" -Verbose -WhatIf
 
             This will show the verbose and WhatIf messages from running this functions. No changes will be made.
+
+        .EXAMPLE
+            Enable-akRDP -ComputerName "THATPC","OTHERPC" -UserName "bdoll" -Path "C:\RDPConnectionFiles" -Verbose
 			
 		.EXAMPLE
 			Imoprt-CSV .\RDPNeeded.csv | Enable-akRDP
 		
-			Enables RDP on each computer for under the ComputerName and UserName headers in the RDPNeeded.csv file.
+			Enables RDP on each computer for under the ComputerName and UserName headers in the RDPNeeded.csv file. Other parameters will
+            user their default values.
             
         .NOTES
             Enable RDP Access to computers that are going to be connected to thru a VPN.
