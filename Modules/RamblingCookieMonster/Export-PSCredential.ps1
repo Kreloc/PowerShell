@@ -1,4 +1,5 @@
-﻿function Export-PSCredential { 
+﻿Function Export-PSCredential 
+{ 
     <#
     .SYNOPSIS
        Export credentials to a file

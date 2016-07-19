@@ -76,4 +76,5 @@ Function Convert-NatoAlphabet {
             Write-Output $NewString
         }
     } # End Process
+    End{}
 }

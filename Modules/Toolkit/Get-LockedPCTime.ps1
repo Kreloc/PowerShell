@@ -29,36 +29,62 @@ Function Get-LockedPCTime
 	[CmdletBinding()]
 	param
 	(
-		[Parameter(Mandatory=$True,
+		[Parameter(Mandatory=$False,
 		ValueFromPipeline=$True, ValueFromPipelinebyPropertyName=$true)]
-		[string]$ComputerName	
+		[string[]]$ComputerName	= $ENV:COMPUTERNAME
 	)
 	Begin{}
 	Process 
 	{
-		Write-Verbose "Retrieving security event logs from $ComputerName"
-		$LockLogs = Get-WinEvent -ComputerName $ComputerName -FilterHashTable @{LogName ='Security';id=4800} | Sort TimeCreated -Descending
-		$UnLockLogs = Get-WinEvent -ComputerName $ComputerName -FilterHashTable @{LogName ='Security';id=4801} | Sort TimeCreated -Descending
-		Write-Verbose "Determining if computer $ComputerName is locked"
-		If($LockLogs[0].TimeCreated -gt $UnLockLogs[0].TimeCreated)
-		{
-			$LockedTime = (Get-Date) - $LockLogs[0].TimeCreated
-			$TimePCLocked = $LockedTime.ToString()
-			$props = @{ComputerName=$ComputerName
-						TimeLocked=$TimePCLocked
-						Locked=$True
-					}
+        $Results = @()
+        ForEach($Computer in $ComputerName)
+        {
+		    Write-Verbose "Retrieving security event logs from $Computer"
+            Try
+            {
+		        $LockLogs = Get-WinEvent -ComputerName $Computer -FilterHashTable @{LogName ='Security';id=4800} -ErrorAction Stop | Sort TimeCreated -Descending
+            }
+            Catch
+            {
+                Write-Warning "Could not find lock event in Security log on $Computer"
+                $Issue = $True
+            }
+            Try
+            {
+		        $UnLockLogs = Get-WinEvent -ComputerName $Computer -FilterHashTable @{LogName ='Security';id=4801} -ErrorAction Stop | Sort TimeCreated -Descending
+            }
+            Catch
+            {
+                Write-Warning "Could not find unlock event in Security log on $Computer"
+                $Issue = $True
+            }
+		    Write-Verbose "Determining if computer $Computer is locked"
+            If($LockLogs -and $UnLockLogs)
+            {
+                Write-Verbose "Determing amount of time computer has been locked"
+		        If($LockLogs[0].TimeCreated -gt $UnLockLogs[0].TimeCreated)
+		        {
+			        $LockedTime = (Get-Date) - $LockLogs[0].TimeCreated
+			        $TimePCLocked = $LockedTime.ToString()
+			        $props = @{ComputerName=$Computer
+						        TimeLocked=$TimePCLocked
+						        Locked=$True
+                                Issue=$False
+					        }
+		        }
+            }
+		    else
+		    {
+			    $props = @{ComputerName=$Computer
+						    TimeLocked="Not Locked"
+						    Locked=$False
+                            Issue=$Issue
+						    }
+		    }
+		    Write-Verbose "Creating custom output object"	
+		    $Results += New-Object -TypeName PSObject -Property $props
 		}
-		else
-		{
-			$props = @{ComputerName=$ComputerName
-						TimeLocked="Not Locked"
-						Locked=$False
-						}
-		}
-		Write-Verbose "Creating custom output object"	
-		$Results = New-Object -TypeName PSObject -Property $props
-		$Results
+        $Results
 	}
 	End{}
 }	

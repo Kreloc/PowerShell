@@ -26,35 +26,70 @@ Function Get-Serials
 	(
 		[Parameter(Mandatory=$False,
 		ValueFromPipeline=$True, ValueFromPipelinebyPropertyName=$true)][Alias('Name')]
-		$ComputerName = $env:computername
+		[string[]]$ComputerName = $env:computername
 	)
-	PROCESS
+	Process
 	{
-		$bios = Get-WmiObject Win32_Bios -ComputerName $ComputerName | Select @{name="PC";expression={$_.__Server}}, SerialNumber, Description
-		[array]$monitor = Get-WMIObject WmiMonitorID -Namespace root\wmi -ComputerName $ComputerName
-		$numberofmonitors = ($monitor.active.count) -1
-		$i = 0
-		Do
-		{
-			[array]$names += ($monitor[$i].UserFriendlyName -NotMatch 0 | ForEach {[char]$_}) -join ""
-			$i++
-		}
-		until($i -gt $numberofmonitors)
-		$x = 0
-		Do
-		{
-			[array]$serials += ($monitor[$x].SerialNumberID -NotMatch 0 | ForEach {[char]$_}) -join ""
-			$x++
-		}
-		until($x -gt $numberofmonitors)
-	    $props = @{ComputerName=$bios.PC
-							PCSerialNumber=$bios.SerialNumber
-							MonitorNames=$names
-							MonitorSerials=$serials							
-		}
-		$serials = $null
-		$names = $null
-		$fininfo = New-Object –TypeName PSObject –Property $props
-		$fininfo
-	}	
+        $fininfo = @()
+        ForEach($Computer in $ComputerName)
+        {
+            Try
+            {
+		        $bios = Get-WmiObject Win32_Bios -ComputerName $Computer -ErrorAction Stop | Select @{name="ComputerName";expression={$_.__Server}}, SerialNumber, Description
+            }
+            Catch
+            {
+                Write-Warning "Could not connect to WMI Class Win32_Bios on $Computer"
+                Continue
+            }
+            Try
+            {
+		        [array]$monitor = Get-WMIObject WmiMonitorID -Namespace root\wmi -ComputerName $Computer -ErrorAction Stop
+            }
+            Catch
+            {
+                Write-Warning "Could not connect to WMIMonitorID on $Computer"
+                Continue
+            }
+		    $numberofmonitors = ($monitor.active.count)
+		    $i = 0
+		    Do
+		    {
+                If($monitor[$i].UserFriendlyName -notlike "")
+                {
+			        [array]$names += ($monitor[$i].UserFriendlyName -NotMatch 0 | ForEach {[char]$_}) -join ""
+                }
+                else
+                {
+                    [array]$names += ""
+                }
+			    $i++
+		    }
+		    until($i -eq $numberofmonitors)
+		    $x = 0
+		    Do
+		    {
+                If($monitor[$x].SeialNumberID -notlike "")
+                {
+			        [array]$serials += ($monitor[$x].SerialNumberID -NotMatch 0 | ForEach {[char]$_}) -join ""
+                }
+                else
+                {
+                    [array]$serial += ""
+                }
+			    $x++
+		    }
+		    until($x -eq $numberofmonitors)
+	        $props = @{ComputerName=$bios.ComputerName
+							    PCSerialNumber=$bios.SerialNumber
+							    MonitorNames=$names
+							    MonitorSerials=$serials							
+		    }
+		    $serials = $null
+		    $names = $null
+		    $fininfo += New-Object -TypeName PSObject -Property $props
+	    }
+        $fininfo
+    }
+    End{}
 }
