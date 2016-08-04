@@ -1,15 +1,15 @@
 
-#Script Browser Begin
-#Version: 1.3.2
+# Script Browser Begin
+# Version: 1.3.2
 Add-Type -Path 'C:\Program Files (x86)\Microsoft Corporation\Microsoft Script Browser\System.Windows.Interactivity.dll'
 Add-Type -Path 'C:\Program Files (x86)\Microsoft Corporation\Microsoft Script Browser\ScriptBrowser.dll'
 Add-Type -Path 'C:\Program Files (x86)\Microsoft Corporation\Microsoft Script Browser\BestPractices.dll'
 $scriptBrowser = $psISE.CurrentPowerShellTab.VerticalAddOnTools.Add('Script Browser', [ScriptExplorer.Views.MainView], $true)
 $scriptAnalyzer = $psISE.CurrentPowerShellTab.VerticalAddOnTools.Add('Script Analyzer', [BestPractices.Views.BestPracticesView], $true)
 $psISE.CurrentPowerShellTab.VisibleVerticalAddOnTools.SelectedAddOnTool = $scriptBrowser
-#Script Browser End
+# Script Browser End
 
-###Region Profile Internal Functions
+### Region Profile Internal Functions
 function Export-ISEState
 {
 <#
@@ -228,9 +228,9 @@ function Import-ISEState
 ### End Region Profile Functions
 
 
-#Add own SubMenu
+# Add own SubMenu
 $MyMenu = $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("MyTools", $null, $null)
-#Add function help and Cmdlet Binding
+# Add function help and Cmdlet Binding
  $text = @'
  Function [function]
  {
@@ -274,7 +274,6 @@ $MyMenu = $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("MyTools", $null, 
 		ValueFromPipeline=$True, ValueFromPipelinebyPropertyName=$true)]
 		[string[]]$ComputerName	
 	)
-    retrun
     #Instruction for supporting WhatIf
     #Change to [CmdletBinding(SupportsShouldProcess=$true)]
     #Add this If statement block around each piece of code that would change something or produce output
@@ -292,70 +291,46 @@ $MyMenu = $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("MyTools", $null, 
 '@
 $action = {
     $psise.CurrentFile.Editor.InsertText("$text")
-    #jump cursor to the end
+    # jump cursor to the end
     $psise.CurrentFile.editor.SetCaretPosition($psise.CurrentFile.Editor.CaretLine,$psise.CurrentFile.Editor.CaretColumn)
 }
  
-#add the action to the Add-Ons menu
+# add the action to the Add-Ons menu
 $MyMenu.Submenus.Add("Insert Advanced Function Snippet",$Action,"Alt+N" ) | Out-Null
-#End Insert Advanced function SubMenu
+# End Insert Advanced function SubMenu
 
-#Begin Save-All function SubMenu
+# Begin Save-All function SubMenu
 $action = {
 $psise.CurrentPowerShellTab.Files.Where({-Not $_.isSaved -AND -Not $_.IsUntitled}).Foreach({$_.save()})
 }
 $MyMenu.Submenus.Add("Save all unsaved files", $action, "Ctrl+Alt+S") | Out-Null
-#End Save-All function
-#Begin load PowerShell Console Profile
+# End Save-All function
+
+# Begin load PowerShell Console Profile
 $action = {
 $path = "$($profile.CurrentUserCurrentHost)" -replace "ISE"
 .$path
 }
 $MyMenu.Submenus.Add("Load User PS Profile",$Action,"Alt+P" ) | Out-Null
-#End load user PowerShell profile
-#Begin check spelling
-#$action = {
-#$words = $psISE.CurrentFile.Editor.Text -split " "
-#}
-##  [xml]$xaml = @"
-## <Window 
-##     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-##     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-##     x:Name="Window" Title="Initial Window" WindowStartupLocation = "CenterScreen" ResizeMode="NoResize"
-##     SizeToContent = "WidthAndHeight" ShowInTaskbar = "True" Background = "lightgray"> 
-##     <StackPanel >  
-##         <Label Content='Type in this textbox' />
-##         <TextBox x:Name="Content" Height = "50" Text="$text" SpellCheck.IsEnabled="True"/>  
-##         <Button x:Name = "button1" Height = "75" Width = "75" Content = 'OK' Background="Yellow" />
-##     </StackPanel>
-## ## </Window>
-## "@ 
-##  
-## $reader=(New-Object System.Xml.XmlNodeReader $xaml)
-## $Window=[Windows.Markup.XamlReader]::Load( $reader )
-## $txtBox = $Window.FindName('Content')
-## $button1 = $Window.FindName('button1')
-## $button1.Add_Click({
-##     $newText = $txtBox.Text
-## })
-## 
-## $Window.ShowDialog() | Out-Null
-#End check spelling
-#Comment out selected text
+# End load PowerShell console profile
+
+# Comment out selected text
 $action = {
 $text = $psISE.CurrentFile.editor.selectedText
 $psISE.CurrentFile.Editor.InsertText( [regex]::Replace($text, '^', '##', 'Multiline'))
 }
 $MyMenu.Submenus.Add("Comment Code",$Action,"Alt+3" ) | Out-Null
-#End Comment selected text
-#Uncomment selected text
+# End Comment selected text
+
+# Uncomment selected text
 $action = {
 $text = $psISE.CurrentFile.editor.selectedText
 $psISE.CurrentFile.Editor.InsertText( [regex]::Replace($text, '^##', '', 'Multiline'))
 }
 $MyMenu.Submenus.Add("UnComment Code",$Action,"Alt+4" ) | Out-Null
-#End uncomment selected text
-#Begin move to cursor
+# End uncomment selected text
+
+# Begin move to cursor
 $addonName = "Go To _Cursor"
 $addonkey = "Alt+C"
 $action = {
@@ -363,26 +338,31 @@ $action = {
     $psise.CurrentFile.Editor.Focus()
 }
 $MyMenu.SubMenus.Add($addonName,$action,$addonkey) | Out-Null
-#Save state file path
+# End move to cursor
+
+# Save state file path
 $ISE_STATE_FILE_PATH = Join-Path (Split-Path $profile -Parent) "IseState.xml"
 
-# Add a new option in the Add-ons menu to export the current ISE state.
+# Begin export the current ISE state.
 if (!($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Save ISE State" }))
 {
     $MyMenu.Submenus.Add("Save ISE State",{Export-ISEState $ISE_STATE_FILE_PATH},"Alt+Shift+S") | Out-Null
 }
+# End export the current ISE state.
 
-# Add a new option in the Add-ons menu to export the current ISE state and exit.
+# Begin export the current ISE state and exit.
 if (!($MyMenu.Submenus | Where-Object { $_.DisplayName -eq "Save ISE State And Exit" }))
 {
     $MyMenu.Submenus.Add("Save ISE State And Exit",{Export-ISEState $ISE_STATE_FILE_PATH; exit},"Alt+Shift+E") | Out-Null
 }
+# End export the current ISE state and exit
 
-# Add a new option in the Add-ons menu to import the ISE state.
+# Begin import the ISE state.
 if (!($MyMenu.Submenus | Where-Object { $_.DisplayName -eq "Load ISE State" }))
 {
     $MyMenu.Submenus.Add("Load ISE State",{Import-ISEState $ISE_STATE_FILE_PATH},"Alt+Shift+L") | Out-Null
 }
+# End import the ISE state.
 
 ## Region running scripts
 
